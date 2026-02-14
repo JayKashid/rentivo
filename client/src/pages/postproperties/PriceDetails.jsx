@@ -1,25 +1,37 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Clock, ArrowLeft, Calendar, IndianRupee, Shield, HelpCircle, Upload, X, Image, Film } from "lucide-react";
+import {
+  Clock, ArrowLeft, Calendar, IndianRupee, Shield,
+  HelpCircle, Upload, X, Image
+} from "lucide-react";
 import Navbar from "../../pages/admindashboard/Navbar";
 import API from "../../services/api";
 
 const PriceDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [form, setForm] = useState({
+    // From AddHouse
+    userType: "Owner",
+    phone: "",
+    category: "Residential",
+    purpose: "Rent",
+
+    // From PropertyDetails
     name: "",
     city: "",
-    propertyType: "Apartment",
+    propertyType: "",
     projectName: "",
     locality: "",
-    bhk: "2",
+    bhk: "",
     area: "",
     areaUnit: "sqft",
     furnishType: "Fully Furnished",
     amenities: [],
-    
+    shareWithAgents: false,
+
+    // Price details
     monthlyRent: "",
     availableFrom: new Date().toISOString().split('T')[0],
     securityDeposit: "2 month",
@@ -29,12 +41,14 @@ const PriceDetails = () => {
   const [photos, setPhotos] = useState([]);
   const [photoPreview, setPhotoPreview] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
+  // Merge data passed from previous page
   useEffect(() => {
     if (location.state?.formData) {
       setForm(prev => ({
         ...prev,
-        ...location.state.formData
+        ...location.state.formData,
       }));
     }
   }, [location.state]);
@@ -43,14 +57,14 @@ const PriceDetails = () => {
     const { name, value, type, checked } = e.target;
     setForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     const newPhotos = files.slice(0, 10 - photos.length);
-    
+
     newPhotos.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -58,7 +72,7 @@ const PriceDetails = () => {
       };
       reader.readAsDataURL(file);
     });
-    
+
     setPhotos(prev => [...prev, ...newPhotos]);
   };
 
@@ -69,61 +83,75 @@ const PriceDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validation
-    if (!form.monthlyRent || !form.availableFrom) {
-      alert("Please fill in all required fields");
+    setError("");
+
+    // Basic validation
+    if (!form.monthlyRent) {
+      setError("Monthly rent is required");
+      return;
+    }
+    if (!form.availableFrom) {
+      setError("Available from date is required");
+      return;
+    }
+    if (!form.phone || !/^\d{10}$/.test(form.phone)) {
+      setError("Valid 10-digit phone number is required");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // Prepare payload – include ALL fields
       const payload = {
-        userType: "Owner",
-        phone: "9999999999",
+        // From AddHouse
+        userType: form.userType,
+        phone: form.phone,
+        category: form.category,
+        purpose: form.purpose,
+
+        // From PropertyDetails
         name: form.name || "Unnamed Property",
         city: form.city || "Unknown City",
         locality: form.locality || "Unknown Locality",
-        propertyType: form.propertyType,
-        bhk: form.bhk,
+        propertyType: form.propertyType || "Apartment",
+        bhk: form.bhk || "2",
         area: parseInt(form.area) || 0,
         areaUnit: form.areaUnit,
         furnishType: form.furnishType,
         amenities: form.amenities || [],
+        shareWithAgents: form.shareWithAgents || false,
 
+        // Price details
         monthlyRent: parseInt(form.monthlyRent),
         securityDeposit: form.customDeposit || form.securityDeposit,
         availableFrom: form.availableFrom,
 
-        photos: photoPreview,
+        // Media
+        photos: photoPreview, // base64 – replace with URLs when implementing upload
         videos: [],
 
+        // Meta
         status: "Under Review",
         isActive: false,
-        isDeleted: false,
-        verificationStatus: "Pending",
-        createdAt: new Date().toISOString()
       };
 
       const res = await API.post("/properties", payload);
       console.log("Property saved:", res.data);
-      
-      alert("✅ Property posted successfully!");
-      
-      // Redirect to YourPosts page
-      navigate("/your-posts");
 
+      alert("✅ Property posted successfully!");
+      navigate("/your-posts");
     } catch (err) {
       console.error("Error posting property:", err);
-      alert("❌ Failed to post property. Please try again.");
+      const msg = err.response?.data?.message || "Failed to post property. Please try again.";
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
   return (
@@ -150,6 +178,13 @@ const PriceDetails = () => {
                 Back
               </button>
             </div>
+
+            {/* Error message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                {error}
+              </div>
+            )}
 
             {/* Timer Alert */}
             <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
@@ -212,8 +247,8 @@ const PriceDetails = () => {
                     <button
                       key={deposit}
                       type="button"
-                      onClick={() => setForm(prev => ({ 
-                        ...prev, 
+                      onClick={() => setForm(prev => ({
+                        ...prev,
                         securityDeposit: deposit,
                         customDeposit: deposit === "Custom" ? prev.customDeposit : ""
                       }))}
@@ -227,7 +262,7 @@ const PriceDetails = () => {
                     </button>
                   ))}
                 </div>
-                
+
                 {form.securityDeposit === "Custom" && (
                   <div className="relative">
                     <IndianRupee className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -262,7 +297,7 @@ const PriceDetails = () => {
                     <div className="flex flex-col items-center gap-2">
                       <Image className="w-8 h-8 text-slate-400" />
                       <p className="text-sm font-medium text-slate-700">Click to upload photos</p>
-                      <p className="text-xs text-slate-500">You can upload up to 10 photos (JPG, PNG, GIF)</p>
+                      <p className="text-xs text-slate-500">You can upload up to 10 photos (JPG, PNG)</p>
                     </div>
                   </label>
                 </div>
@@ -295,6 +330,13 @@ const PriceDetails = () => {
                 )}
               </div>
 
+              {/* Hidden fields – not required but we include them for completeness */}
+              <input type="hidden" name="userType" value={form.userType} />
+              <input type="hidden" name="phone" value={form.phone} />
+              <input type="hidden" name="category" value={form.category} />
+              <input type="hidden" name="purpose" value={form.purpose} />
+              <input type="hidden" name="shareWithAgents" value={form.shareWithAgents} />
+
               {/* Submit Button */}
               <div className="pt-8 border-t border-slate-100">
                 <button
@@ -307,7 +349,7 @@ const PriceDetails = () => {
                   <Shield className="w-5 h-5" />
                   {isSubmitting ? "Posting..." : "Post Property"}
                 </button>
-                
+
                 <p className="text-sm text-slate-500 text-center mt-4">
                   Your property will be reviewed and activated within 24 hours
                 </p>

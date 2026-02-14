@@ -112,104 +112,52 @@ const YourPosts = () => {
   };
 
   // HARD DELETE FUNCTION - PERMANENTLY REMOVE FROM MONGODB
-  const handleDelete = async (id) => {
-    if (!id) {
-      setError('Invalid property ID');
-      return;
-    }
+ const handleDelete = async (id) => {
+  if (!id) {
+    setError('Invalid property ID');
+    return;
+  }
 
-    // Get property details for confirmation message
-    const propertyToDelete = properties.find(p => p._id === id);
-    if (!propertyToDelete) {
-      setError('Property not found');
-      return;
-    }
+  const propertyToDelete = properties.find(p => p._id === id);
+  if (!propertyToDelete) {
+    setError('Property not found');
+    return;
+  }
 
-    // Strong confirmation for permanent deletion
-    const confirmed = window.confirm(
-      `⚠️ PERMANENT DELETE WARNING!\n\n` +
-      `You are about to PERMANENTLY delete:\n` +
-      `• ${propertyToDelete.name}\n` +
-      `• ${propertyToDelete.type}\n` +
-      `• ${propertyToDelete.price}/month\n` +
-      `• ${propertyToDelete.locality}, ${propertyToDelete.city}\n\n` +
-      `✅ This will FREE UP storage space\n` +
-      `❌ This action CANNOT be undone!\n\n` +
-      `Are you absolutely sure you want to permanently delete this property?`
-    );
+  const confirmed = window.confirm(
+    `⚠️ PERMANENT DELETE WARNING!\n\n` +
+    `You are about to permanently delete:\n` +
+    `• ${propertyToDelete.name}\n` +
+    `• ${propertyToDelete.type}\n` +
+    `• ${propertyToDelete.price}/month\n` +
+    `• ${propertyToDelete.locality}, ${propertyToDelete.city}\n\n` +
+    `This action CANNOT be undone!\n\n` +
+    `Are you sure?`
+  );
 
-    if (!confirmed) {
-      return; // User cancelled
-    }
+  if (!confirmed) return;
 
-    try {
-      setDeletingId(id);
-      setError(null);
-      setSuccessMessage(null);
-      
-      console.log(`🚨 Attempting HARD DELETE for property ID: ${id}`);
-      
-      // Use DELETE method to permanently remove from MongoDB
-      const response = await API.delete(`/properties/${id}`);
-      
-      console.log('✅ Hard delete successful:', response.data);
-      
-      // Remove from local state completely
-      setProperties(prev => prev.filter(p => p._id !== id));
-      
-      setSuccessMessage('✅ Property permanently deleted from database! Storage has been freed.');
-      setTimeout(() => setSuccessMessage(null), 4000);
-      
-    } catch (error) {
-      console.error("❌ Failed to delete property:", error);
-      console.error("Error details:", error.response?.data || error.message);
-      
-      // If DELETE method fails (404 or 405), it means DELETE endpoint doesn't exist
-      if (error.response?.status === 404 || error.response?.status === 405) {
-        console.log('DELETE endpoint not found, trying PUT as fallback...');
-        
-        // Show user option for fallback
-        const fallbackConfirmed = window.confirm(
-          'DELETE endpoint not available. Try fallback method?\n\n' +
-          'Note: Fallback might not free up storage immediately.'
-        );
-        
-        if (fallbackConfirmed) {
-          try {
-            // Try PUT method to mark as deleted (soft delete as fallback)
-            const putResponse = await API.put(`/properties/${id}`, {
-              status: "Deleted",
-              isActive: false,
-              isDeleted: true,
-              deletedAt: new Date().toISOString()
-            });
-            
-            console.log('✅ Fallback delete successful:', putResponse.data);
-            
-            // Update local state
-            setProperties(prev => prev.map(p => 
-              p._id === id 
-                ? { ...p, status: 'Deleted', isActive: false, isDeleted: true }
-                : p
-            ));
-            
-            setSuccessMessage('Property marked as deleted (fallback). Storage may not be freed.');
-            setTimeout(() => setSuccessMessage(null), 4000);
-            
-          } catch (putError) {
-            console.error('❌ Fallback also failed:', putError);
-            setError('Both DELETE and fallback methods failed. Please check backend configuration.');
-            setTimeout(() => setError(null), 5000);
-          }
-        }
-      } else {
-        setError('Failed to delete property. Server error.');
-        setTimeout(() => setError(null), 5000);
-      }
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  try {
+    setDeletingId(id);
+    setError(null);
+    setSuccessMessage(null);
+
+    console.log(`Deleting property ID: ${id}`);
+    await API.delete(`/properties/${id}`);
+
+    // Remove from local state
+    setProperties(prev => prev.filter(p => p._id !== id));
+
+    setSuccessMessage('Property permanently deleted from database.');
+    setTimeout(() => setSuccessMessage(null), 4000);
+  } catch (error) {
+    console.error('Delete failed:', error);
+    setError(error.response?.data?.message || 'Failed to delete property. Please try again.');
+    setTimeout(() => setError(null), 5000);
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   const handleEdit = (property) => {
     setEditingId(property._id);

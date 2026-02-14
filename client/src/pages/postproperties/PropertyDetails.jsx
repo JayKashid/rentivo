@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, MapPin, Square, Ruler, Sofa, Check, HelpCircle, ArrowLeft, MessageCircle, ChevronRight } from "lucide-react";
 import Navbar from "../../pages/admindashboard/Navbar";
+import API from "../../services/api";
 
 const PropertyDetails = () => {
   const location = useLocation();
@@ -20,6 +21,10 @@ const PropertyDetails = () => {
     furnishType: "Fully Furnished",
     amenities: [],
     shareWithAgents: false,
+     userType: "Owner",
+    phone: "",
+    category: "Residential",
+    purpose: "Rent",
   });
 
   // Get data passed from previous page
