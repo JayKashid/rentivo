@@ -11,93 +11,138 @@ const Home = () => {
   const { properties: contextProperties } = useAppContext();
   const [featuredProperties, setFeaturedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    
-    // Filter properties (same logic as PropertyListings)
-    let filtered = contextProperties.filter(property => !property.isDeleted);
-    
-    // Take only first 3 properties
-    filtered = filtered.slice(0, 3);
+    try {
+      setLoading(true);
+      setError(null);
 
-    // Transform properties for display (similar to PropertyListings)
-    const transformedProperties = filtered.map(property => {
-      // Extract bedrooms from type
-      const bedroomMatch = property.type?.match(/(\d+)\s*BHK/) || 
-                          property.type?.match(/(\d+)\s*BED/) || 
-                          property.type?.match(/(\d+)\s*BEDROOM/);
-      const bedrooms = bedroomMatch ? parseInt(bedroomMatch[1]) : 1;
-      
-      // Extract bathrooms
-      const bathroomMatch = property.type?.match(/(\d+)\s*BATH/) || 
-                           property.description?.match(/(\d+)\s*BATH/);
-      const bathrooms = bathroomMatch ? parseInt(bathroomMatch[1]) : Math.max(1, bedrooms - 1);
-      
-      // Extract area
-      const areaMatch = property.area?.match(/(\d+)/) || property.type?.match(/(\d+)\s*SQFT/);
-      const area = areaMatch ? `${areaMatch[1]} sqft` : (property.area || 'N/A');
-      
-      // Format price
-      let price = property.price || 'Price on request';
-      if (typeof price === 'number') {
-        price = `₹ ${price.toLocaleString('en-IN')}`;
-      } else if (!price.includes('₹') && price !== 'Price on request') {
-        price = `₹ ${price}`;
-      }
-      
-      return {
-        id: property.id,
-        title: property.type || 'Property',
-        type: property.type,
-        price: price,
-        location: property.locality || property.location || property.city || 'Location not specified',
-        area: area,
-        bedrooms: bedrooms,
-        bathrooms: bathrooms,
-        furnishing: property.furnishing || 'Not specified',
-        images: property.images || property.photos || ['https://images.unsplash.com/photo-1613490493576-7fde63acd811'],
-        isVerified: property.verificationStatus === 'Verified',
-        isFeatured: property.visibility?.includes('High') || property.plan === 'Paid',
-        postedDate: property.lastAdded || property.createdAt || 'Recently',
-        category: property.category || 'Rent',
-        status: property.status || 'Under Review',
-        isActive: property.isActive || false,
-        propertyType: property.propertyType || 'Residential',
-        city: property.city,
-        description: property.description
-      };
-    });
+      // Filter out deleted properties
+      let filtered = contextProperties.filter(property => !property.isDeleted);
 
-    setFeaturedProperties(transformedProperties);
-    setLoading(false);
+      // Sort by newest first using createdAt or fallback
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.postedDate || 0);
+        const dateB = new Date(b.createdAt || b.postedDate || 0);
+        return dateB - dateA;
+      });
+
+      console.log("Sorted properties (newest first):", filtered.map(p => ({
+        name: p.name || p.title,
+        createdAt: p.createdAt,
+        postedDate: p.postedDate,
+        area: p.area,
+        type: p.type,
+        monthlyRent: p.monthlyRent
+      })));
+
+      // Take only the first 3
+      const newestThree = filtered.slice(0, 3);
+
+      // Transform for display with safe checks
+      const transformedProperties = newestThree.map(property => {
+        // Bedrooms extraction (safe)
+        const bedroomMatch = property.type?.match(/(\d+)\s*BHK/) || 
+                            property.type?.match(/(\d+)\s*BED/) || 
+                            property.type?.match(/(\d+)\s*BEDROOM/);
+        const bedrooms = bedroomMatch ? parseInt(bedroomMatch[1]) : 1;
+
+        // Bathrooms (safe)
+        const bathroomMatch = property.type?.match(/(\d+)\s*BATH/) || 
+                             property.description?.match(/(\d+)\s*BATH/);
+        const bathrooms = bathroomMatch ? parseInt(bathroomMatch[1]) : Math.max(1, bedrooms - 1);
+
+        // Area - use directly (number or string)
+        const areaDisplay = property.area ?? 'N/A';
+
+        // Price formatting (safe)
+        let price = property.price || property.monthlyRent || 'Price on request';
+        if (typeof price === 'number') {
+          price = `₹ ${price.toLocaleString('en-IN')}`;
+        } else if (typeof price === 'string' && !price.includes('₹') && price !== 'Price on request') {
+          price = `₹ ${price}`;
+        }
+
+        // Images (safe)
+        const images = property.images || property.photos;
+        const firstImage = (Array.isArray(images) && images.length > 0) 
+          ? images[0] 
+          : 'https://images.unsplash.com/photo-1613490493576-7fde63acd811';
+
+        return {
+          id: property.id || property._id,
+          title: property.type || property.propertyType || 'Property',
+          type: property.type,
+          price: price,
+          location: property.locality || property.location || property.city || 'Location not specified',
+          area: areaDisplay,
+          bedrooms: bedrooms,
+          bathrooms: bathrooms,
+          furnishing: property.furnishing || property.furnishType || 'Not specified',
+          images: [firstImage],
+          isVerified: property.verificationStatus === 'Verified',
+          isFeatured: property.visibility?.includes('High') || property.plan === 'Paid',
+          postedDate: property.lastAdded || property.createdAt || 'Recently',
+          category: property.category || 'Rent',
+          status: property.status || 'Under Review',
+          isActive: property.isActive || false,
+          propertyType: property.propertyType || 'Residential',
+          city: property.city,
+          description: property.description
+        };
+      });
+
+      setFeaturedProperties(transformedProperties);
+    } catch (err) {
+      console.error("Error processing properties:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [contextProperties]);
 
   const handleShowAll = () => {
-    navigate("api/properties");
+    navigate("/properties");
   };
 
+  // Error display
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 bg-red-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-red-800 mb-4">Something went wrong</h2>
+          <p className="text-red-600">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ... rest of the component JSX (same as before)
   return (
     <div className="min-h-screen">
       <HeroSection />
       <FeaturedDevelopers />
       <FurnitureDevelopers />
-      
+
       {/* Featured Properties Section */}
       <div className="bg-gradient-to-b from-white to-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-10">
             <div className="mb-6 md:mb-0">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                 Latest Properties
               </h2>
               <p className="text-gray-600 text-lg">
-                Discover our latest properties across multiple cities
+                Discover our newest properties across multiple cities
               </p>
             </div>
-            
-           
           </div>
 
           {loading ? (
@@ -117,11 +162,9 @@ const Home = () => {
             </div>
           ) : (
             <>
-              {/* Properties Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {featuredProperties.map((property) => (
                   <div key={property.id} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    {/* Image Section */}
                     <div className="relative h-56 overflow-hidden">
                       <img
                         src={property.images[0]}
@@ -152,7 +195,6 @@ const Home = () => {
                       </div>
                     </div>
 
-                    {/* Details Section */}
                     <div className="p-6">
                       <div className="mb-4">
                         <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">{property.title}</h3>
@@ -162,7 +204,6 @@ const Home = () => {
                         </div>
                       </div>
 
-                      {/* Property Features */}
                       <div className="grid grid-cols-4 gap-3 py-4 border-y border-gray-100 mb-5">
                         <div className="text-center">
                           <div className="flex items-center justify-center gap-1 mb-1">
@@ -193,7 +234,6 @@ const Home = () => {
                         </div>
                       </div>
 
-                      {/* Price and CTA */}
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-sm text-gray-500">Price</div>
@@ -211,7 +251,6 @@ const Home = () => {
                 ))}
               </div>
 
-              {/* Bottom CTA */}
               <div className="mt-16 text-center">
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">

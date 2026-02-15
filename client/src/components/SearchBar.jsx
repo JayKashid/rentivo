@@ -1,12 +1,13 @@
-// components/SearchBar.jsx
 import React, { useState } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SearchBar = ({ 
   onSearch,
   placeholder = "Search by locality, project, or builder",
   variant = "dark"
 }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -19,16 +20,20 @@ const SearchBar = ({
     "Viman Nagar",
   ];
 
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return;
-    
+  const performSearch = (query) => {
+    if (!query.trim()) return;
+
+    // If custom onSearch is provided, call it
     if (onSearch) {
-      onSearch({
-        query: searchQuery.trim(),
-        type: 'all'
-      });
+      onSearch({ query: query.trim(), type: 'all' });
+    } else {
+      // Otherwise navigate to properties page with search param
+      navigate(`/properties?search=${encodeURIComponent(query.trim())}`);
     }
-    
+  };
+
+  const handleSearch = () => {
+    performSearch(searchQuery);
     setShowSuggestions(false);
   };
 
@@ -40,12 +45,7 @@ const SearchBar = ({
 
   const handlePopularSearch = (search) => {
     setSearchQuery(search);
-    if (onSearch) {
-      onSearch({
-        query: search,
-        type: 'all'
-      });
-    }
+    performSearch(search);
     setShowSuggestions(false);
   };
 

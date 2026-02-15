@@ -28,7 +28,7 @@ function AppContent() {
           <Route path="/property-details" element={<PropertyDetails />} />
           <Route path="/price-details" element={<PriceDetails />} />
           <Route path="/your-posts" element={<YourPosts />} />
-          <Route path="/api/properties" element={<PropertyListings />} />
+          <Route path="/properties" element={<PropertyListings />} />
           {/* Add route for individual property details */}
           <Route path="/login" element={<Login />} />
           <Route path="/property/:id" element={<HouseDetails />} />
