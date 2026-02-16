@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../middleware/upload.js";
 import {
   createProperty,
   getAllProperties,
@@ -7,9 +8,14 @@ import {
 
 const router = express.Router();
 
-router.post("/", createProperty);
+// ✅ MUST use multer here
+router.post(
+  "/",
+  upload.array("photos", 10), // field name must match FormData
+  createProperty
+);
+
 router.get("/", getAllProperties);
 router.get("/:id", getPropertyById);
 
 export default router;
-

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Clock, ArrowLeft, Calendar, IndianRupee, Shield,
-  HelpCircle, Upload, X, Image
+  HelpCircle, X, Image
 } from "lucide-react";
 import Navbar from "../../pages/admindashboard/Navbar";
 import API from "../../services/api";
@@ -12,13 +12,10 @@ const PriceDetails = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    // From AddHouse
     userType: "Owner",
     phone: "",
     category: "Residential",
     purpose: "Rent",
-
-    // From PropertyDetails
     name: "",
     city: "",
     propertyType: "",
@@ -30,8 +27,6 @@ const PriceDetails = () => {
     furnishType: "Fully Furnished",
     amenities: [],
     shareWithAgents: false,
-
-    // Price details
     monthlyRent: "",
     availableFrom: new Date().toISOString().split('T')[0],
     securityDeposit: "2 month",
@@ -43,29 +38,23 @@ const PriceDetails = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Merge data passed from previous page
   useEffect(() => {
     if (location.state?.formData) {
-      setForm(prev => ({
-        ...prev,
-        ...location.state.formData,
-      }));
+      setForm(prev => ({ ...prev, ...location.state.formData }));
     }
   }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newPhotos = files.slice(0, 10 - photos.length);
+    const remainingSlots = 10 - photos.length;
+    const newFiles = files.slice(0, remainingSlots);
 
-    newPhotos.forEach(file => {
+    newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(prev => [...prev, reader.result]);
@@ -73,7 +62,7 @@ const PriceDetails = () => {
       reader.readAsDataURL(file);
     });
 
-    setPhotos(prev => [...prev, ...newPhotos]);
+    setPhotos(prev => [...prev, ...newFiles]);
   };
 
   const removePhoto = (index) => {
@@ -85,74 +74,53 @@ const PriceDetails = () => {
     e.preventDefault();
     setError("");
 
-    // Basic validation
-    if (!form.monthlyRent) {
-      setError("Monthly rent is required");
-      return;
-    }
-    if (!form.availableFrom) {
-      setError("Available from date is required");
-      return;
-    }
-    if (!form.phone || !/^\d{10}$/.test(form.phone)) {
-      setError("Valid 10-digit phone number is required");
-      return;
-    }
+    if (!form.monthlyRent) return setError("Monthly rent is required");
+    if (!form.phone || !/^\d{10}$/.test(form.phone))
+      return setError("Valid 10-digit phone number is required");
 
     setIsSubmitting(true);
 
     try {
-      // Prepare payload – include ALL fields
-      const payload = {
-        // From AddHouse
-        userType: form.userType,
-        phone: form.phone,
-        category: form.category,
-        purpose: form.purpose,
+      const formData = new FormData();
 
-        // From PropertyDetails
-        name: form.name || "Unnamed Property",
-        city: form.city || "Unknown City",
-        locality: form.locality || "Unknown Locality",
-        propertyType: form.propertyType || "Apartment",
-        bhk: form.bhk || "2",
-        area: parseInt(form.area) || 0,
-        areaUnit: form.areaUnit,
-        furnishType: form.furnishType,
-        amenities: form.amenities || [],
-        shareWithAgents: form.shareWithAgents || false,
+      // Append each form field
+      Object.entries(form).forEach(([key, value]) => {
+        if (value === null || value === undefined) return;
 
-        // Price details
-        monthlyRent: parseInt(form.monthlyRent),
-        securityDeposit: form.customDeposit || form.securityDeposit,
-        availableFrom: form.availableFrom,
+        // Convert arrays to JSON string
+        if (Array.isArray(value)) {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
+      });
 
-        // Media
-        photos: photoPreview, // base64 – replace with URLs when implementing upload
-        videos: [],
+      // Append photos as files
+      photos.forEach(photo => {
+        formData.append("photos", photo);
+      });
 
-        // Meta
-        status: "Under Review",
-        isActive: false,
-      };
+      // Log the FormData contents for debugging (optional)
+      console.log("📦 Sending FormData:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1]);
+      }
 
-      const res = await API.post("/properties", payload);
-      console.log("Property saved:", res.data);
+      const res = await API.post("/properties", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       alert("✅ Property posted successfully!");
       navigate("/your-posts");
     } catch (err) {
-      console.error("Error posting property:", err);
-      const msg = err.response?.data?.message || "Failed to post property. Please try again.";
-      setError(msg);
+      console.error("❌ Error posting property:", err);
+      setError(err.response?.data?.message || "Failed to post property");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+  const handleBack = () => navigate(-1);
 
   return (
     <>
@@ -169,17 +137,12 @@ const PriceDetails = () => {
                   <span className="text-sm text-slate-500">Complete your property listing</span>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors"
-              >
+              <button type="button" onClick={handleBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors">
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </button>
             </div>
 
-            {/* Error message */}
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                 {error}
@@ -284,29 +247,34 @@ const PriceDetails = () => {
                 <label className="block text-sm font-semibold text-slate-700 mb-3">
                   Upload Photos
                 </label>
-                <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-indigo-400 transition-colors duration-200">
+                <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-indigo-400 transition-colors">
                   <input
                     type="file"
                     multiple
                     accept="image/*"
                     onChange={handlePhotoUpload}
+                    disabled={photos.length >= 10}
                     className="hidden"
                     id="photo-input"
                   />
                   <label htmlFor="photo-input" className="cursor-pointer">
                     <div className="flex flex-col items-center gap-2">
                       <Image className="w-8 h-8 text-slate-400" />
-                      <p className="text-sm font-medium text-slate-700">Click to upload photos</p>
-                      <p className="text-xs text-slate-500">You can upload up to 10 photos (JPG, PNG)</p>
+                      <p className="text-sm font-medium text-slate-700">
+                        {photos.length >= 10
+                          ? "Maximum 10 photos reached"
+                          : "Click to upload photos"}
+                      </p>
+                      <p className="text-xs text-slate-500">Up to 10 photos (JPG, PNG)</p>
                     </div>
                   </label>
                 </div>
 
-                {/* Photo Preview */}
+                {/* Photo Previews */}
                 {photoPreview.length > 0 && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-slate-700 mb-3">
-                      Uploaded Photos ({photos.length}/10)
+                      Selected Photos ({photos.length}/10)
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {photoPreview.map((preview, index) => (
@@ -319,7 +287,7 @@ const PriceDetails = () => {
                           <button
                             type="button"
                             onClick={() => removePhoto(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -330,7 +298,7 @@ const PriceDetails = () => {
                 )}
               </div>
 
-              {/* Hidden fields – not required but we include them for completeness */}
+              {/* Hidden fields */}
               <input type="hidden" name="userType" value={form.userType} />
               <input type="hidden" name="phone" value={form.phone} />
               <input type="hidden" name="category" value={form.category} />
@@ -349,7 +317,6 @@ const PriceDetails = () => {
                   <Shield className="w-5 h-5" />
                   {isSubmitting ? "Posting..." : "Post Property"}
                 </button>
-
                 <p className="text-sm text-slate-500 text-center mt-4">
                   Your property will be reviewed and activated within 24 hours
                 </p>
