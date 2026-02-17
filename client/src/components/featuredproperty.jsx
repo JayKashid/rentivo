@@ -1,242 +1,131 @@
 import React from "react";
 import {
-  MapPin,
-  Home,
-  Building2,
+  CheckCircle,
   Star,
   Calendar,
-  Phone,
-  ExternalLink,
+  TrendingUp,
+  Users,
+  Home,
 } from "lucide-react";
-import image from "../assets/apartment1.png";
+import image from "../assets/apartment1.png"; // Import your image
 
 const FeaturedDevelopers = () => {
-  const developers = [
-    {
-      id: 1,
-      name: "Navin's Housing & Properties",
-      year: "1989",
-      projects: "25+",
-      image: image,
-      description:
-        "Since 1989, Navin's has passionately woven dreams into reality, constructing homes where memories bloom...",
-      projectsList: [
-        "Navins Cedar",
-        "Navins Starwood",
-        "Navins Oak",
-        "Navins Maple",
-      ],
-      featuredProperty: {
-        name: "Navins Cedar At Starwood Township",
-        location: "Venjavalai, Chennai South",
-        price: "₹1.47 Cr - 1.63 Cr",
-      },
-      rating: 4.8,
-      reviews: 234,
-    },
-    {
-      id: 2,
-      name: "Premier Housing & Properties",
-      year: "2008",
-      projects: "18+",
-      image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716",
-      description:
-        "Premier Housing & Properties is a company developing Real Assets over half a decade with a mission to provide...",
-      projectsList: [
-        "Premier JJS",
-        "Premier Skyline",
-        "Premier Greens",
-        "Premier Heights",
-      ],
-      featuredProperty: {
-        name: "Premier JJS Ashok Nagar",
-        location: "Sriperumbudur, Chennai",
-        price: "₹26.46 L - 79.38 L",
-      },
-      rating: 4.6,
-      reviews: 189,
-    },
-    {
-      id: 3,
-      name: "Ravima Developers",
-      year: "2023",
-      projects: "12+",
-      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be",
-      description:
-        "The core values of the company are – Innovation, Trust, Customer Satisfaction, and Transparency. We aim...",
-      projectsList: [
-        "Newton Homes",
-        "Ravima Nest",
-        "Newton Heights",
-        "Newton Greens",
-      ],
-      featuredProperty: {
-        name: "Newton Homes Handewadi",
-        location: "Hadaipat, Handewadi Road-Hadaipat",
-        price: "₹57.59 L - 73.75 L",
-      },
-      rating: 4.5,
-      reviews: 156,
-    },
+  const features = [
+    "In-app scheduling for property viewings",
+    "Real-time market price updates",
+    "User-friendly interface for smooth navigation",
+    "Access to off-market properties",
   ];
 
   return (
-    <section className="px-6 py-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-          Featured Developers
-        </h2>
-        <p className="text-sm md:text-base text-slate-600 mt-2">
-          Prominent real estate builders across India
-        </p>
-        <div className="h-px bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300 mt-4" />
-      </div>
+    <section className="px-6 py-12 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* Left column: text content */}
+        <div>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <Home className="w-4 h-4" />
+            Your Trusted Real Estate Partner
+          </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {developers.map((dev) => (
-          <div
-            key={dev.id}
-            className="bg-white rounded-xl border border-slate-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-          >
-            {/* Image */}
-            <div className="relative h-40 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 rounded-t-xl flex items-center justify-center overflow-hidden">
-              {typeof dev.image === "string" ? (
-                <img
-                  src={dev.image}
-                  alt={dev.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={dev.image}
-                  alt={dev.name}
-                  className="w-full h-full object-cover"
-                />
-              )}
+          {/* Heading */}
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+            <span>Helping You Every Step</span>
+            <br className="hidden sm:block" />
+            <span className="text-blue-600 mt-2 inline-block">Of The Way</span>
+          </h2>
 
-              {/* Rating */}
-              <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 shadow-sm">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span className="font-bold text-slate-800">{dev.rating}</span>
-                <span className="text-slate-500 text-xs">({dev.reviews})</span>
+          {/* Description / Features */}
+          <p className="text-slate-600 text-lg mb-6">
+            Trust, clarity, and simplicity are at the core of everything we do
+            to make your property journey easy.
+          </p>
+
+          <ul className="space-y-3 mb-8">
+            {features.map((feature, index) => (
+              <li key={index} className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-700">{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Stats row */}
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-600" />
               </div>
-
-              {/* Year */}
-              <div className="absolute top-3 left-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium px-3 py-1.5 rounded-lg shadow">
-                Est. {dev.year}
+              <div>
+                <div className="font-bold text-xl text-slate-900">
+                  35+ Years
+                </div>
+                <div className="text-sm text-slate-500">
+                  of dedicated home sales experience
+                </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="p-3">
-              <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1">
-                {dev.name}
-              </h3>
-
-              {/* Stats */}
-              <div className="flex gap-6 mb-4 text-sm">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-slate-900">{dev.year}</div>
-                    <div className="text-xs text-slate-500">Established</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Building2 className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-slate-900">
-                      {dev.projects}
-                    </div>
-                    <div className="text-xs text-slate-500">Projects</div>
-                  </div>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Star className="w-6 h-6 text-yellow-600 fill-current" />
               </div>
-
-              {/* Description */}
-              <p className="text-sm text-slate-600 line-clamp-2 mb-4">
-                {dev.description}
-              </p>
-
-              {/* Projects */}
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-slate-700 mb-3">
-                  Key Projects
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {dev.projectsList.map((p, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-2.5 py-1 bg-slate-50 text-slate-700 rounded-md border border-slate-200 hover:bg-slate-100 transition-colors"
-                    >
-                      {p}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Featured Property */}
-              <div className="border border-slate-200 rounded-xl p-3 mb-4 bg-gradient-to-r from-slate-50 to-white">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Home className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-semibold text-slate-900 truncate mb-1">
-                      {dev.featuredProperty.name}
-                    </h4>
-                    <p className="text-xs text-slate-600 flex items-center gap-1.5 mb-2">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {dev.featuredProperty.location}
-                    </p>
-                    <p className="text-base font-bold text-blue-600">
-                      {dev.featuredProperty.price}
-                    </p>
+              <div>
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-xl text-slate-900">5.0</span>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-4 h-4 text-yellow-500 fill-current"
+                      />
+                    ))}
                   </div>
                 </div>
-              </div>
-
-              {/* Actions - Both buttons with same color */}
-              <div className="flex gap-3">
-                <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm py-2 px-3 rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-sm hover:shadow">
-                  <ExternalLink className="w-4 h-4" />
-                  View Projects
-                </button>
-                <button className="flex-1 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 text-sm py-2 px-3 rounded-lg hover:from-blue-200 hover:to-blue-100 transition-all duration-300 flex items-center justify-center gap-2 font-medium border border-blue-200">
-                  <Phone className="w-4 h-4" />
-                  Contact
-                </button>
+                <div className="text-sm text-slate-500">
+                  Trusted by 100,000+ users
+                </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Stats Section */}
-      <div className="mt-10 bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-5 text-white">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold mb-2">150+</div>
-            <div className="text-sm opacity-90">Trusted Developers</div>
+        {/* Right column: image with stats overlay */}
+        <div className="relative">
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <img
+              src={image}
+              alt="Modern apartment building"
+              className="w-full h-full object-cover"
+            />
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 via-blue-600/30 to-transparent"></div>
+
+            {/* Stats cards positioned over the image */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30">
+                  <TrendingUp className="w-6 h-6 mb-2 text-white" />
+                  <div className="font-bold text-xl">₹2.5L+</div>
+                  <div className="text-sm text-white/80">Average savings</div>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30">
+                  <Users className="w-6 h-6 mb-2 text-white" />
+                  <div className="font-bold text-xl">50K+</div>
+                  <div className="text-sm text-white/80">Happy customers</div>
+                </div>
+                <div className="col-span-2 bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30">
+                  <Home className="w-6 h-6 mb-2 text-white" />
+                  <div className="font-bold text-xl">10,000+</div>
+                  <div className="text-sm text-white/80">Properties listed</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold mb-2">2,500+</div>
-            <div className="text-sm opacity-90">Completed Projects</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold mb-2">4.5+</div>
-            <div className="text-sm opacity-90">Avg. Rating</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold mb-2">95%</div>
-            <div className="text-sm opacity-90">Satisfaction</div>
-          </div>
+
+          {/* Decorative circles */}
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-200 rounded-full opacity-30 blur-2xl -z-10"></div>
+          <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-200 rounded-full opacity-30 blur-2xl -z-10"></div>
         </div>
       </div>
     </section>

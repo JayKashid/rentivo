@@ -18,7 +18,7 @@ const PropertyDetails = () => {
     bhk: "",
     area: "",
     areaUnit: "sqft",
-    furnishType: "Fully Furnished",
+    furnishType: "",
     amenities: [],
     shareWithAgents: false,
      userType: "Owner",
