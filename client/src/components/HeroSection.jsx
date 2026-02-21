@@ -3,9 +3,9 @@ import { useState } from "react";
 import image from "../assets/house.png";
 import SearchBar from "./SearchBar";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 // import {SearchBar, SmartPropertySearchBar } from './SearchBar';
-
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -19,6 +19,10 @@ const HeroSection = () => {
     { id: "PG", label: "PG/Co-living", icon: "👥" },
     { id: "PLOTS", label: "Plots", icon: "📍" },
   ];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const popularSearches = [
     "Koregaon Park",
@@ -40,7 +44,9 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white overflow-hidden">
+    <section 
+    id="hero"
+     className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white overflow-hidden">
       {/* Background Elements - simplified */}
       <div className="absolute inset-0 bg-grid-white/5 bg-[size:20px_20px]" />
 
@@ -122,18 +128,16 @@ const HeroSection = () => {
             <div className="space-y-3">
               <div className="relative">
                 {/* Search Section */}
-<div className="space-y-3">
-  <SearchBar
-  variant="dark"
-  onSearch={({ query }) => {
-    navigate(
-      `/properties?search=${encodeURIComponent(query)}&type=${activeTab}`
-    );
-  }}
-/>
-
-</div>
-
+                <div className="space-y-3">
+                  <SearchBar
+                    variant="dark"
+                    onSearch={({ query }) => {
+                      navigate(
+                        `/properties?search=${encodeURIComponent(query)}&type=${activeTab}`,
+                      );
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Popular Searches - compact */}

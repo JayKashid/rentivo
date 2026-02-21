@@ -39,6 +39,10 @@ const PriceDetails = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
+
+  useEffect(() => {
     if (location.state?.formData) {
       setForm(prev => ({ ...prev, ...location.state.formData }));
     }
