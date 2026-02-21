@@ -11,6 +11,7 @@ import { AppProvider } from "./context/AppContext";
 import PropertyListings from "./pages/user/PropertyListings";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+
 // import CardDetails from "./components/CardDetails";
 
 function AppContent() {
@@ -31,6 +32,7 @@ function AppContent() {
           <Route path="/properties" element={<PropertyListings />} />
           {/* Add route for individual property details */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/property/:id" element={<HouseDetails />} />
           {/* <Route path="/property/:id" element={<CardDetails />} /> */}
         </Routes>
