@@ -41,7 +41,7 @@ const YourPosts = () => {
     try {
       setRefreshing(true);
       setError(null);
-      const res = await API.get("/properties");
+      const res = await API.get("/properties/my-properties");
       
       if (res.data && Array.isArray(res.data)) {
         // Transform and sort properties (newest first)

@@ -17,6 +17,7 @@ export const createProperty = async (req, res) => {
     }
 
     const propertyData = {
+      userId: req.user, // Add userId from authenticated user
       userType: req.body.userType || "Owner",
       phone: req.body.phone,
       category: req.body.category || "Residential",
@@ -62,10 +63,20 @@ export const getAllProperties = async (req, res) => {
   }
 };
 
+export const getUserProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({ userId: req.user }).sort({ createdAt: -1 });
+    res.json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) return res.status(404).json({ message: "Property not found" });
+    // Removed authorization check for public viewing
     res.json(property);
   } catch (error) {
     res.status(400).json({ message: "Invalid ID" });
@@ -74,8 +85,12 @@ export const getPropertyById = async (req, res) => {
 
 export const deleteProperty = async (req, res) => {
   try {
-    const property = await Property.findByIdAndDelete(req.params.id);
+    const property = await Property.findById(req.params.id);
     if (!property) return res.status(404).json({ message: "Property not found" });
+    if (property.userId.toString() !== req.user) {
+      return res.status(403).json({ message: "Not authorized to delete this property" });
+    }
+    await Property.findByIdAndDelete(req.params.id);
     res.json({ message: "Property deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

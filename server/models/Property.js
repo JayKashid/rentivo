@@ -52,8 +52,15 @@ const propertySchema = new mongoose.Schema(
       enum: ["Rent", "Sell", "PG"],
       required: true,
     },
+     userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    // ... rest of schema ...
   },
   { timestamps: true }
+
 );
 
 export default mongoose.model("Property", propertySchema);
