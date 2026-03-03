@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
   MapPin,
   Bed,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import API from "../../services/api";
+import PropertyCard from "../../components/PropertyCard"; // correct relative path from pages/user to components
 
 const PropertyListings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,7 +42,7 @@ const PropertyListings = () => {
       try {
         setIsLoading(true);
         setFetchError(null);
-        console.log("Fetching properties from:", API.defaults.baseURL + "/properties"); // log full URL
+        console.log("Fetching properties from:", API.defaults.baseURL + "/properties");
         const res = await API.get("/properties");
         console.log("API response:", res);
         console.log("Fetched properties count:", res.data.length);
@@ -51,17 +53,19 @@ const PropertyListings = () => {
         const transformed = res.data.map((p) => ({
           id: p._id,
           title: p.name || "Unnamed Property",
-          price: p.monthlyRent ? `₹${p.monthlyRent}` : "Price on request",
-          location: p.locality || "Location not specified",
+          price: p.monthlyRent ? `₹${p.monthlyRent.toLocaleString("en-IN")}/mo` : "Price on request",
+          // Combine locality and city for location display
+          location: [p.locality, p.city].filter(Boolean).join(", ") || "Location not specified",
           city: p.city || "",
           bedrooms: parseInt(p.bhk) || 1,
-          bathrooms: 1, // You might want to calculate this properly
+          bathrooms: p.bathrooms || 1, // if backend provides bathrooms, use it; otherwise fallback
           area: p.area ? `${p.area} ${p.areaUnit || 'sqft'}` : "N/A",
           furnishing: p.furnishType || "Not specified",
           images: p.photos?.length > 0 ? p.photos : ["https://images.unsplash.com/photo-1613490493576-7fde63acd811"],
+          description: p.description || "Discover a harmonious blend of modern luxury and timeless elegance...",
+          propertyType: p.propertyType || "Residential",
           postedDate: p.createdAt ? new Date(p.createdAt).toDateString() : "Recently",
           status: p.status || "Under Review",
-          propertyType: p.propertyType || "Residential",
         }));
 
         setAllProperties(transformed);
@@ -103,6 +107,12 @@ const PropertyListings = () => {
     }
 
     // Sorting
+    const extractPrice = (price) => {
+      if (!price) return 0;
+      const numeric = parseInt(price.replace(/\D/g, ""));
+      return isNaN(numeric) ? 0 : numeric;
+    };
+
     if (filters.sortBy === "price-low") {
       filtered.sort((a, b) => extractPrice(a.price) - extractPrice(b.price));
     } else if (filters.sortBy === "price-high") {
@@ -113,12 +123,6 @@ const PropertyListings = () => {
 
     setDisplayProperties(filtered);
   }, [searchTerm, filters, allProperties]);
-
-  const extractPrice = (price) => {
-    if (!price) return 0;
-    const numeric = parseInt(price.replace(/\D/g, ""));
-    return isNaN(numeric) ? 0 : numeric;
-  };
 
   const handleSearchChange = (e) => {
     const newTerm = e.target.value;
@@ -190,31 +194,7 @@ const PropertyListings = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {displayProperties.map((property) => (
-            <div key={property.id} className="bg-white border rounded-xl overflow-hidden shadow hover:shadow-lg transition">
-              <img
-                src={property.images[0]}
-                className="h-56 w-full object-cover"
-                alt={property.title}
-                onError={(e) => {
-                  e.target.src = "https://images.unsplash.com/photo-1613490493576-7fde63acd811";
-                }}
-              />
-              <div className="p-4">
-                <h3 className="font-bold text-lg">{property.title}</h3>
-                <p className="text-gray-500 flex items-center gap-1 mt-1">
-                  <MapPin size={14} /> {property.location}, {property.city}
-                </p>
-                <p className="text-blue-600 text-xl font-bold mt-2">{property.price}</p>
-                <div className="grid grid-cols-3 gap-3 text-sm mt-4 text-gray-700">
-                  <div className="flex items-center gap-1"><Bed size={16} /> {property.bedrooms}</div>
-                  <div className="flex items-center gap-1"><Bath size={16} /> {property.bathrooms}</div>
-                  <div className="flex items-center gap-1"><Square size={16} /> {property.area}</div>
-                </div>
-                <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg flex justify-center items-center gap-2">
-                  <Phone size={16} /> Contact Owner
-                </button>
-              </div>
-            </div>
+            <PropertyCard key={property.id} property={property} />
           ))}
         </div>
       )}

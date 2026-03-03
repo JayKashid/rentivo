@@ -159,76 +159,76 @@ const YourPosts = () => {
   }
 };
 
-  const handleEdit = (property) => {
-    setEditingId(property._id);
-    setEditForm({
-      name: property.name,
-      city: property.city,
-      locality: property.locality,
-      monthlyRent: property.monthlyRent,
-      area: property.area,
-      furnishType: property.furnishType,
-      propertyType: property.propertyType,
-      bhk: property.bhk,
-      areaUnit: property.areaUnit,
-      securityDeposit: property.securityDeposit,
-    });
-  };
+  // const handleEdit = (property) => {
+  //   setEditingId(property._id);
+  //   setEditForm({
+  //     name: property.name,
+  //     city: property.city,
+  //     locality: property.locality,
+  //     monthlyRent: property.monthlyRent,
+  //     area: property.area,
+  //     furnishType: property.furnishType,
+  //     propertyType: property.propertyType,
+  //     bhk: property.bhk,
+  //     areaUnit: property.areaUnit,
+  //     securityDeposit: property.securityDeposit,
+  //   });
+  // };
 
-  const handleSaveEdit = async (id) => {
-    if (!id) {
-      setError('Invalid property ID');
-      return;
-    }
+  // const handleSaveEdit = async (id) => {
+  //   if (!id) {
+  //     setError('Invalid property ID');
+  //     return;
+  //   }
 
-    try {
-      setError(null);
-      setSuccessMessage(null);
+  //   try {
+  //     setError(null);
+  //     setSuccessMessage(null);
       
-      const updatedProperty = {
-        name: editForm.name,
-        city: editForm.city,
-        locality: editForm.locality,
-        monthlyRent: parseInt(editForm.monthlyRent) || 0,
-        area: parseInt(editForm.area) || 0,
-        furnishType: editForm.furnishType,
-        propertyType: editForm.propertyType,
-        bhk: editForm.bhk,
-        areaUnit: editForm.areaUnit,
-        securityDeposit: editForm.securityDeposit,
-        status: "Under Review",
-      };
+  //     const updatedProperty = {
+  //       name: editForm.name,
+  //       city: editForm.city,
+  //       locality: editForm.locality,
+  //       monthlyRent: parseInt(editForm.monthlyRent) || 0,
+  //       area: parseInt(editForm.area) || 0,
+  //       furnishType: editForm.furnishType,
+  //       propertyType: editForm.propertyType,
+  //       bhk: editForm.bhk,
+  //       areaUnit: editForm.areaUnit,
+  //       securityDeposit: editForm.securityDeposit,
+  //       status: "Under Review",
+  //     };
 
-      console.log('Updating property:', id, updatedProperty);
+  //     console.log('Updating property:', id, updatedProperty);
       
-      const response = await API.put(`/properties/${id}`, updatedProperty);
-      console.log('Update successful:', response.data);
+  //     const response = await API.put(`/properties/${id}`, updatedProperty);
+  //     console.log('Update successful:', response.data);
       
-      // Update local state
-      setProperties(prev => prev.map(p => 
-        p._id === id 
-          ? { 
-              ...p, 
-              ...updatedProperty,
-              price: updatedProperty.monthlyRent ? `₹${parseInt(updatedProperty.monthlyRent).toLocaleString('en-IN')}` : '₹0',
-              type: `${updatedProperty.bhk || '2'} BHK ${updatedProperty.propertyType || 'Apartment'}`,
-              areaDisplay: `${updatedProperty.area || 0} ${updatedProperty.areaUnit || 'sqft'}`,
-              furnishing: updatedProperty.furnishType,
-              status: 'Under Review'
-            }
-          : p
-      ));
+  //     // Update local state
+  //     setProperties(prev => prev.map(p => 
+  //       p._id === id 
+  //         ? { 
+  //             ...p, 
+  //             ...updatedProperty,
+  //             price: updatedProperty.monthlyRent ? `₹${parseInt(updatedProperty.monthlyRent).toLocaleString('en-IN')}` : '₹0',
+  //             type: `${updatedProperty.bhk || '2'} BHK ${updatedProperty.propertyType || 'Apartment'}`,
+  //             areaDisplay: `${updatedProperty.area || 0} ${updatedProperty.areaUnit || 'sqft'}`,
+  //             furnishing: updatedProperty.furnishType,
+  //             status: 'Under Review'
+  //           }
+  //         : p
+  //     ));
       
-      setEditingId(null);
-      setSuccessMessage('Property updated successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
+  //     setEditingId(null);
+  //     setSuccessMessage('Property updated successfully!');
+  //     setTimeout(() => setSuccessMessage(null), 3000);
       
-    } catch (error) {
-      console.error("Failed to update property:", error);
-      setError('Failed to update property. Please try again.');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Failed to update property:", error);
+  //     setError('Failed to update property. Please try again.');
+  //     setTimeout(() => setError(null), 5000);
+  //   }
+  // };
 
   const handleAddProperty = async () => {
     // Validation
@@ -566,7 +566,7 @@ const YourPosts = () => {
             </div>
 
             {/* Add Property Form */}
-            {showAddForm && (
+            {/* {showAddForm && (
               <div className="bg-white rounded-xl border p-6 mb-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Add New Property</h2>
@@ -675,7 +675,7 @@ const YourPosts = () => {
                   </button>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Properties List */}
             <div className="space-y-4">
@@ -707,7 +707,7 @@ const YourPosts = () => {
                         {editingId === property._id ? (
                           <div className="space-y-4 mb-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div>
+                              {/* <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Property Name</label>
                                 <input
                                   type="text"
@@ -716,8 +716,8 @@ const YourPosts = () => {
                                   className="w-full border rounded-lg p-2.5"
                                   placeholder="Property Name"
                                 />
-                              </div>
-                              <div>
+                              </div> */}
+                              {/* <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (₹)</label>
                                 <input
                                   type="number"
@@ -726,8 +726,8 @@ const YourPosts = () => {
                                   className="w-full border rounded-lg p-2.5"
                                   placeholder="Monthly Rent"
                                 />
-                              </div>
-                              <div>
+                              </div> */}
+                              {/* <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
                                 <input
                                   type="text"
@@ -736,8 +736,8 @@ const YourPosts = () => {
                                   className="w-full border rounded-lg p-2.5"
                                   placeholder="City"
                                 />
-                              </div>
-                              <div>
+                              </div> */}
+                              {/* <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Locality</label>
                                 <input
                                   type="text"
@@ -746,22 +746,22 @@ const YourPosts = () => {
                                   className="w-full border rounded-lg p-2.5"
                                   placeholder="Locality"
                                 />
-                              </div>
+                              </div> */}
                             </div>
-                            <div className="flex gap-3">
-                              <button
+                            {/* <div className="flex gap-3"> */}
+                              {/* <button
                                 onClick={() => handleSaveEdit(property._id)}
                                 className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                               >
                                 Save Changes
-                              </button>
-                              <button
+                              </button> */}
+                              {/* <button
                                 onClick={() => setEditingId(null)}
                                 className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                               >
                                 Cancel
-                              </button>
-                            </div>
+                              </button> */}
+                            {/* </div> */}
                           </div>
                         ) : (
                           <>
@@ -776,25 +776,25 @@ const YourPosts = () => {
                           </>
                         )}
 
-                        <div className="space-y-2 mb-6">
-                          <div className="flex items-center text-gray-600 text-sm">
+                        {/* <div className="space-y-2 mb-6"> */}
+                          {/* <div className="flex items-center text-gray-600 text-sm">
                             <Calendar className="w-4 h-4 mr-2 text-gray-400" />
                             <span>Posted: {property.lastAdded}</span>
-                          </div>
-                          <div className="flex items-center text-gray-600 text-sm">
+                          </div> */}
+                          {/* <div className="flex items-center text-gray-600 text-sm">
                             <Shield className="w-4 h-4 mr-2 text-gray-400" />
                             <span>Verification: {property.verificationStatus}</span>
-                          </div>
-                        </div>
+                          </div> */}
+                        {/* </div> */}
 
                         <div className="flex flex-wrap gap-3">
-                          <button 
+                          {/* <button 
                             onClick={() => handleEdit(property)}
                             className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm flex items-center gap-2"
                           >
                             <Edit className="w-4 h-4" />
                             Edit
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => handleDelete(property._id)}
                             disabled={deletingId === property._id}

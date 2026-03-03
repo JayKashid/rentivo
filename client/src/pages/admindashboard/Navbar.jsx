@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Home, FileText, MoreVertical, PlusCircle, 
-  User, ChevronDown, Bell, Search, MessageSquare,
-  Settings, LogOut, HelpCircle, BarChart,
-  Calendar, Wallet, Shield, X, Menu
+  ChevronDown, Search, X, Menu,
+  // Icons used in the "More" dropdown
+  Bell, MessageSquare, HelpCircle, Settings
 } from "lucide-react";
 
 const Navbar = () => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  // Replace with real auth state later
+  const isAuthenticated = false;
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home className="w-4 h-4" />, path: "/dashboard" },
@@ -24,14 +26,6 @@ const Navbar = () => {
     { label: "Messages", icon: <MessageSquare className="w-4 h-4" />, path: "/messages" },
     { label: "Help Center", icon: <HelpCircle className="w-4 h-4" />, path: "/help" },
     { label: "Settings", icon: <Settings className="w-4 h-4" />, path: "/settings" },
-  ];
-
-  const profileOptions = [
-    { label: "My Profile", icon: <User className="w-4 h-4" />, path: "/profile" },
-    { label: "Account Settings", icon: <Settings className="w-4 h-4" />, path: "/settings" },
-    { label: "Billing", icon: <Wallet className="w-4 h-4" />, path: "/billing" },
-    { label: "Privacy", icon: <Shield className="w-4 h-4" />, path: "/privacy" },
-    { label: "Logout", icon: <LogOut className="w-4 h-4" />, path: "/logout" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -119,61 +113,15 @@ const Navbar = () => {
                 <span>Add Property</span>
               </Link>
 
-              {/* Notification Bell */}
-              <button className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              {/* Messages */}
-              <button className="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
-                <MessageSquare className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
-              </button>
-
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              {/* Login Button (visible when not authenticated)
+              {!isAuthenticated ? (
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">RK</span>
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-slate-600 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isProfileOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
-                    {/* User Info */}
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center">
-                          <span className="text-white font-semibold">RK</span>
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-900">Rahul Kumar</div>
-                          <div className="text-xs text-slate-500">Property Owner</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Profile Options */}
-                    <div className="py-2">
-                      {profileOptions.map((option, index) => (
-                        <Link
-                          key={index}
-                          to={option.path}
-                          className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                        >
-                          {option.icon}
-                          <span className="text-sm">{option.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                  Login
+                </Link>
+              ) : null} */}
 
               {/* Mobile Menu Button */}
               <button
@@ -242,7 +190,7 @@ const Navbar = () => {
               {/* Mobile Add Property Button */}
               <div className="pt-4 border-t border-slate-100">
                 <Link
-                  to="/add-property"
+                  to="/add-house"   // unified path
                   className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -250,18 +198,25 @@ const Navbar = () => {
                   <span>Add Property</span>
                 </Link>
               </div>
+
+              {/* Mobile Login (if not authenticated) */}
+              {!isAuthenticated && (
+                <div className="pt-2">
+                  <Link
+                    to="/login"
+                    className="block w-full text-center px-4 py-3 bg-indigo-600 text-white rounded-lg font-semibold"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
       </nav>
 
-      {/* Close dropdowns when clicking outside */}
-      {isProfileOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsProfileOpen(false)}
-        />
-      )}
+      {/* Close more dropdown when clicking outside */}
       {isMoreOpen && (
         <div 
           className="fixed inset-0 z-40" 
